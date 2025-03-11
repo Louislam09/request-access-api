@@ -1,7 +1,15 @@
 const express = require("express");
+const cors = require("cors");
 const requestRoutes = require("./routes/requestRoutes");
 
 const app = express();
+
+// Enable CORS for all origins
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware
 app.use(express.json());
