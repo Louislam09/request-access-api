@@ -1,13 +1,7 @@
-const express = require("express");
-const db = require("./database");
-const { validateEmail, validateName } = require("./utils/validation");
+const db = require('../models/database');
+const { validateEmail, validateName } = require('../utils/validation');
 
-const app = express();
-const PORT = 5000;
-
-app.use(express.json());
-
-app.post("/request-access", async (req, res) => {
+const createRequest = async (req, res) => {
     const { name, email } = req.body;
 
     // Validate name
@@ -32,9 +26,9 @@ app.post("/request-access", async (req, res) => {
         }
         res.status(500).json({ message: "Error creating request" });
     }
-});
+};
 
-app.get("/requests", async (req, res) => {
+const getAllRequests = async (req, res) => {
     try {
         const requests = await db.getAllRequests();
         res.json(requests);
@@ -42,9 +36,9 @@ app.get("/requests", async (req, res) => {
         console.error(err);
         res.status(500).json({ message: "Error fetching requests" });
     }
-});
+};
 
-app.get("/check-status", async (req, res) => {
+const checkStatus = async (req, res) => {
     const { email } = req.body;
     
     // Validate email
@@ -63,9 +57,9 @@ app.get("/check-status", async (req, res) => {
         console.error(err);
         res.status(500).json({ message: "Error checking status" });
     }
-});
+};
 
-app.put("/requests/:id", async (req, res) => {
+const updateRequestStatus = async (req, res) => {
     const { status } = req.body;
     if (!["approved", "rejected"].includes(status)) {
         return res.status(400).json({ message: "Invalid status" });
@@ -81,18 +75,11 @@ app.put("/requests/:id", async (req, res) => {
         console.error(err);
         res.status(500).json({ message: "Error updating request" });
     }
-});
+};
 
-// Graceful shutdown
-process.on("SIGINT", async () => {
-    try {
-        await db.close();
-        console.log("Database connection closed");
-        process.exit(0);
-    } catch (err) {
-        console.error("Error closing database:", err);
-        process.exit(1);
-    }
-});
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+module.exports = {
+    createRequest,
+    getAllRequests,
+    checkStatus,
+    updateRequestStatus
+};
