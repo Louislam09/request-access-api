@@ -20,26 +20,46 @@ class Database {
             CREATE TABLE IF NOT EXISTS requests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                email TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
                 status TEXT DEFAULT 'pending',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
     }
 
-    createRequest(name, email) {
+    async emailExists(email) {
         return new Promise((resolve, reject) => {
-            const query = "INSERT INTO requests (name, email) VALUES (?, ?)";
-            this.db.run(query, [name, email], function(err) {
+            const query = "SELECT COUNT(*) as count FROM requests WHERE email = ?";
+            this.db.get(query, [email], (err, row) => {
                 if (err) return reject(err);
-                resolve({
-                    id: this.lastID,
-                    name,
-                    email,
-                    status: "pending"
-                });
+                resolve(row.count > 0);
             });
         });
+    }
+
+    async createRequest(name, email) {
+        try {
+            const exists = await this.emailExists(email);
+            if (exists) {
+                throw new Error("Email already registered");
+            }
+
+            return new Promise((resolve, reject) => {
+                const query = "INSERT INTO requests (name, email) VALUES (?, ?)";
+                this.db.run(query, [name, email], (err, result) => {
+                    if (err) return reject(err);
+                    const id = result ? result.lastID : this.lastID;
+                    resolve({
+                        id,
+                        name,
+                        email,
+                        status: "pending"
+                    });
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
     }
 
     getAllRequests() {
@@ -64,16 +84,16 @@ class Database {
 
     updateRequestStatus(id, status) {
         return new Promise((resolve, reject) => {
+            const db = this.db;
             const query = "UPDATE requests SET status = ? WHERE id = ?";
-            this.db.run(query, [status, id], function(err) {
+            db.run(query, [status, id], function(err) {
                 if (err) return reject(err);
                 if (this.changes === 0) {
                     return reject(new Error("Request not found"));
                 }
                 
                 // Get the updated request
-                const getQuery = "SELECT * FROM requests WHERE id = ?";
-                this.db.get(getQuery, [id], (err, row) => {
+                db.get("SELECT * FROM requests WHERE id = ?", [id], (err, row) => {
                     if (err) return reject(err);
                     resolve(row);
                 });
