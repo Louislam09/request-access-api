@@ -29,7 +29,7 @@ request-access-api/
 - Returns all access requests
 
 ### Check Request Status
-- **GET** `/api/check-status`
+- **POST** `/api/check-status`
 - **Body**: `{ "email": "string" }`
 - Check status of requests for a specific email
 
@@ -37,6 +37,10 @@ request-access-api/
 - **PUT** `/api/requests/:id`
 - **Body**: `{ "status": "approved" | "rejected" }`
 - Update the status of a specific request
+
+### Delete Request
+- **DELETE** `/api/requests/:id`
+- Delete a specific request by ID
 
 ## Features
 
