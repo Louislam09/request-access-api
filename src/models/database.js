@@ -100,6 +100,19 @@ class Database {
         });
     }
 
+    deleteRequest(id) {
+        return new Promise((resolve, reject) => {
+            const query = "DELETE FROM requests WHERE id = ?";
+            this.db.run(query, [id], function(err) {
+                if (err) return reject(err);
+                if (this.changes === 0) {
+                    return reject(new Error("Request not found"));
+                }
+                resolve({ success: true, message: "Request deleted successfully" });
+            });
+        });
+    }
+
     close() {
         return new Promise((resolve, reject) => {
             this.db.close((err) => {

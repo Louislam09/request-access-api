@@ -77,9 +77,23 @@ const updateRequestStatus = async (req, res) => {
     }
 };
 
+const deleteRequest = async (req, res) => {
+    try {
+        await db.deleteRequest(req.params.id);
+        res.json({ message: "Request deleted successfully" });
+    } catch (err) {
+        if (err.message === "Request not found") {
+            return res.status(404).json({ message: "Request not found" });
+        }
+        console.error(err);
+        res.status(500).json({ message: "Error deleting request" });
+    }
+};
+
 module.exports = {
     createRequest,
     getAllRequests,
     checkStatus,
-    updateRequestStatus
+    updateRequestStatus,
+    deleteRequest
 };

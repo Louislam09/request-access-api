@@ -7,5 +7,6 @@ router.post('/request-access', requestController.createRequest);
 router.get('/requests', requestController.getAllRequests);
 router.get('/check-status', requestController.checkStatus);
 router.put('/requests/:id', requestController.updateRequestStatus);
+router.delete('/requests/:id', requestController.deleteRequest);
 
 module.exports = router;
